@@ -10,7 +10,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase URL or anon key missing. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY')
 }
 
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase: SupabaseClient = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder'
+)
 
 /**
  * Create a server-side Supabase client using the service role key.

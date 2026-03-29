@@ -1,135 +1,124 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import Link from "next/link"
 import { Star, Users, TrendingUp, ArrowRight } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, useScroll, useTransform, useMotionValueEvent, useSpring } from "framer-motion"
 import { fadeUp, stagger } from "@/lib/animations"
+import { BentoGallery } from "@/components/blocks/bento-gallery"
+
+const FRAME_COUNT = 200
 
 export default function Home() {
   const words = ["Learn", "Practice", "Trade"]
   const [index, setIndex] = useState(0)
 
+  // Scroll sequence state
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const heroRef = useRef<HTMLDivElement>(null)
+  const imagesRef = useRef<HTMLImageElement[]>([])
+  const [imagesLoaded, setImagesLoaded] = useState(false)
+
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end end"]
+  })
+
+  // Smooth out mouse wheel jerky scroll steps
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 200,
+    damping: 40,
+    restDelta: 0.001
+  })
+
+  // Map 0 -> 1 progress to frame index 1 -> FRAME_COUNT
+  const currentIndex = useTransform(smoothProgress, [0, 1], [1, FRAME_COUNT])
+
   useEffect(() => {
+    // 1. Text cycle
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % words.length)
     }, 1800)
+
+    // 2. Preload images
+    const loadImages = () => {
+      const loadedImages: HTMLImageElement[] = []
+      let loadedCount = 0
+
+      for (let i = 1; i <= FRAME_COUNT; i++) {
+        const img = new Image()
+        const paddedIndex = i.toString().padStart(3, '0')
+        img.src = `/framer-super1/ezgif-frame-${paddedIndex}.jpg`
+        
+        img.onload = () => {
+          // Tell browser to decode it off main thread immediately
+          if (img.decode) {
+             img.decode().catch(() => {})
+          }
+          loadedCount++
+          if (loadedCount === FRAME_COUNT) {
+            setImagesLoaded(true)
+            // Draw first frame
+            if (canvasRef.current && loadedImages[0]) {
+              canvasRef.current.width = loadedImages[0].width
+              canvasRef.current.height = loadedImages[0].height
+              const ctx = canvasRef.current.getContext('2d')
+              if (ctx) ctx.drawImage(loadedImages[0], 0, 0)
+            }
+          }
+        }
+        loadedImages.push(img)
+      }
+      imagesRef.current = loadedImages
+    }
+    loadImages()
+
     return () => clearInterval(interval)
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useMotionValueEvent(currentIndex, "change", (latest) => {
+    if (!imagesLoaded || !canvasRef.current || imagesRef.current.length === 0) return
+    const frameNumber = Math.min(FRAME_COUNT - 1, Math.max(0, Math.floor(latest) - 1))
+    const img = imagesRef.current[frameNumber]
+    if (img) {
+      const ctx = canvasRef.current.getContext('2d')
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, canvasRef.current.width, canvasRef.current.height)
+      }
+    }
+  })
 
   return (
     <>
       <Navigation />
 
-      {/* HERO — CREATOR FIRST */}
-      <section className="relative min-h-[95vh] flex items-center bg-gradient-to-br
-        from-blue-50 via-background to-indigo-100
-        dark:from-neutral-900 dark:via-neutral-950 dark:to-black overflow-hidden">
+      {/* HERO — SEQUENCE ANIMATION */}
+      <section ref={heroRef} className="relative h-[400vh] bg-[#F7F2E8]">
+        <div className="sticky top-0 h-[100vh] overflow-hidden flex items-center justify-center">
+          
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
 
-        <div className="absolute inset-0 dark:bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.18),transparent_45%)]" />
-
-        <div className="relative max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-20 items-center">
-
-          {/* TEXT */}
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            animate="visible"
-          >
-            <motion.p
-              variants={fadeUp}
-              className="uppercase tracking-widest text-sm text-muted-foreground mb-4"
-            >
-              Chartered Accountant • Trading Educator
-            </motion.p>
-
-            <motion.h1
-              variants={fadeUp}
-              className="text-6xl md:text-7xl font-extrabold leading-tight mb-8"
-            >
-              <span className="text-primary">
-                {words[index]}
-              </span>{" "}
-              the Markets
-              <br />
-              with Confidence
-            </motion.h1>
-
-            <motion.p
-              variants={fadeUp}
-              className="text-xl text-muted-foreground max-w-xl mb-10"
-            >
-              Structured trading education designed for beginners —
-              no noise, no hype, just clarity and confidence.
-            </motion.p>
-
-            <motion.div variants={fadeUp} className="flex gap-5 flex-wrap">
-              <Link
-                href="/courses"
-                className="group px-8 py-4 bg-primary text-primary-foreground rounded-xl
-                font-semibold flex items-center gap-2
-                hover:shadow-2xl transition"
-              >
-                Start Learning
-                <ArrowRight className="group-hover:translate-x-1 transition" />
-              </Link>
-
-              <Link
-                href="/webinars"
-                className="px-8 py-4 rounded-xl border border-primary
-                text-primary font-semibold hover:bg-primary hover:text-primary-foreground transition"
-              >
-                Free Webinars
-              </Link>
-            </motion.div>
-          </motion.div>
-
-          {/* IMAGE + FLOATING TRUST */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9 }}
-            className="relative"
-          >
-            <div className="absolute -inset-6 bg-primary/20 blur-3xl rounded-full" />
-
-            <img
-              src="/professional-woman-chartered-accountant-trading-ed.jpg"
-              alt="Shobha Pujari"
-              className="relative h-[460px] w-full object-cover rounded-3xl shadow-2xl"
-            />
-
-            <motion.div
-              animate={{ y: [0, -12, 0] }}
-              transition={{ repeat: Infinity, duration: 3 }}
-              className="absolute top-6 left-6 bg-background/80 backdrop-blur
-              px-5 py-3 rounded-xl shadow-lg text-sm font-semibold"
-            >
-              ⭐ 4.9 Rating
-            </motion.div>
-
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ repeat: Infinity, duration: 4 }}
-              className="absolute bottom-6 right-6 bg-background/80 backdrop-blur
-              px-5 py-3 rounded-xl shadow-lg text-sm font-semibold"
-            >
-              👥 5000+ Students
-            </motion.div>
-          </motion.div>
+          {/* Just the canvas, no text overlay as requested */}
         </div>
       </section>
 
+      {/* BENTO SCROLL GALLERY */}
+      <BentoGallery />
+
       {/* TRUST SIGNALS */}
-      <section className="py-24 bg-background">
+      <section className="py-48 bg-white text-[#3E3730] relative overflow-hidden border-t border-[#A38970]/20">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(209,175,98,0.05),transparent_50%)] pointer-events-none" />
         <motion.div
-          variants={stagger}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-10"
+           variants={stagger}
+           initial="hidden"
+           whileInView="visible"
+           viewport={{ once: true, margin: "-100px" }}
+           className="relative z-10 max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8 md:gap-10"
         >
           {[
             { icon: Users, stat: "5000+", label: "Students Trained" },
@@ -141,16 +130,32 @@ export default function Home() {
               <motion.div
                 key={i}
                 variants={fadeUp}
-                whileHover={{ y: -10 }}
-                className="rounded-3xl bg-card p-10 text-center shadow-md hover:shadow-2xl transition"
+                whileHover={{ scale: 1.02, y: -10 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="group relative rounded-[1.5rem] bg-white border border-[#A38970]/10 p-8 text-center shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(209,175,98,0.15)] transition-all duration-500 overflow-hidden"
               >
-                <Icon className="mx-auto mb-6 text-accent" size={36} />
-                <div className="text-5xl font-extrabold text-primary mb-3">
+                {/* Sexy Hover Glow */}
+                <div className="absolute inset-0 bg-gradient-to-b from-[#F7F2E8] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                
+                {/* Animated Icon Badge */}
+                <motion.div
+                  className="relative mx-auto mb-6 w-16 h-16 rounded-2xl bg-white shadow-sm border border-[#A38970]/10 flex items-center justify-center group-hover:border-[#D1AF62]/30 group-hover:shadow-[0_0_20px_rgba(209,175,98,0.2)] transition-all duration-500"
+                  whileHover={{ rotate: [0, -10, 10, -5, 5, 0], scale: 1.1 }}
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                >
+                  <Icon className="text-[#D1AF62] group-hover:scale-110 transition-transform duration-500" size={28} />
+                </motion.div>
+
+                {/* Typography */}
+                <div className="relative z-10 text-5xl font-extrabold text-[#3E3730] mb-2 tracking-tighter drop-shadow-sm group-hover:text-[#D1AF62] transition-colors duration-500">
                   {item.stat}
                 </div>
-                <div className="text-muted-foreground font-medium">
+                <div className="relative z-10 text-[#A38970] font-bold text-xs uppercase tracking-[0.2em] group-hover:text-[#3E3730] transition-colors duration-500">
                   {item.label}
                 </div>
+                
+                {/* Animated Bottom Line */}
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-[#D1AF62] group-hover:w-full transition-all duration-500 ease-out" />
               </motion.div>
             )
           })}
@@ -158,72 +163,74 @@ export default function Home() {
       </section>
 
       {/* TESTIMONIALS — SOCIAL PROOF */}
-      <section className="py-28 bg-muted">
+      <section className="py-32 bg-white text-[#3E3730] relative border-t border-[#A38970]/10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(209,175,98,0.1),transparent_70%)] pointer-events-none" />
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={stagger}
-          className="max-w-7xl mx-auto px-6"
+          className="relative z-10 max-w-7xl mx-auto px-6"
         >
           <motion.h2
             variants={fadeUp}
-            className="text-4xl font-bold text-center mb-6"
+            className="text-4xl md:text-5xl font-bold text-center mb-6 tracking-tight drop-shadow-sm text-[#3E3730]"
           >
             Learners, Not Just Students
           </motion.h2>
 
           <motion.p
             variants={fadeUp}
-            className="text-center text-muted-foreground mb-16"
+            className="text-center text-[#A38970] mb-20 max-w-2xl mx-auto text-lg"
           >
-            Real people. Real progress. Real confidence.
+            Real people. Real progress. Real confidence. Read what our community has to say.
           </motion.p>
 
-          <div className="grid md:grid-cols-3 gap-10">
+          <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 name: "Rajesh Kumar",
                 role: "Investment Professional",
-                text: "Clear frameworks and honest teaching. This changed how I see markets.",
+                text: "Clear frameworks and honest teaching. This changed how I see markets entirely.",
                 initials: "RK",
               },
               {
                 name: "Priya Sharma",
                 role: "Beginner Trader",
-                text: "No fear anymore. I finally understand what I’m doing.",
+                text: "No fear anymore. I finally understand what I’m doing and approach the market calmly.",
                 initials: "PS",
               },
               {
                 name: "Amit Patel",
                 role: "Business Owner",
-                text: "Structured, practical, and grounded in reality.",
+                text: "Structured, practical, and grounded in reality. The best educational investment I've made.",
                 initials: "AP",
               },
             ].map((t, i) => (
               <motion.div
                 key={i}
                 variants={fadeUp}
-                className="rounded-3xl bg-background p-10 shadow-lg"
+                className="rounded-3xl bg-white border border-[#A38970]/20 p-10 shadow-lg hover:shadow-xl transition-shadow flex flex-col justify-between"
               >
-                <div className="flex gap-1 mb-5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={16} className="fill-accent text-accent" />
-                  ))}
+                <div>
+                  <div className="flex gap-1 mb-6">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={18} className="fill-[#D1AF62] text-[#D1AF62]" />
+                    ))}
+                  </div>
+
+                  <p className="text-[#3E3730] mb-10 leading-relaxed text-lg italic font-medium">
+                    “{t.text}”
+                  </p>
                 </div>
 
-                <p className="text-muted-foreground mb-8 leading-relaxed">
-                  “{t.text}”
-                </p>
-
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-accent text-accent-foreground
-                  flex items-center justify-center font-bold">
+                <div className="flex items-center gap-4 border-t border-[#A38970]/20 pt-6">
+                  <div className="w-12 h-12 rounded-full bg-[#D1AF62]/10 text-[#D1AF62] flex items-center justify-center font-bold border border-[#D1AF62]/30 shadow-inner">
                     {t.initials}
                   </div>
                   <div>
-                    <p className="font-semibold">{t.name}</p>
-                    <p className="text-sm text-muted-foreground">{t.role}</p>
+                    <p className="font-semibold text-[#3E3730]">{t.name}</p>
+                    <p className="text-sm text-[#A38970]">{t.role}</p>
                   </div>
                 </div>
               </motion.div>
@@ -233,25 +240,27 @@ export default function Home() {
       </section>
 
       {/* CTA — PERSONAL INVITE */}
-      <section className="py-24 bg-background">
+      <section className="py-48 bg-white text-[#3E3730] relative border-t border-[#A38970]/20 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(188,114,96,0.06),transparent_60%)] pointer-events-none" />
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="max-w-4xl mx-auto px-6 text-center"
+          className="relative z-10 max-w-4xl mx-auto px-6 text-center"
         >
-          <h2 className="text-4xl font-extrabold mb-6">
+          <h2 className="text-5xl font-extrabold mb-8 tracking-tight drop-shadow-sm text-[#3E3730]">
             Start Your Trading Journey the Right Way
           </h2>
-          <p className="text-lg text-muted-foreground mb-10">
+          <p className="text-xl text-[#A38970] mb-12 max-w-2xl mx-auto">
             Learn with structure, discipline, and clarity — not shortcuts.
           </p>
 
           <Link
             href="/courses"
-            className="inline-block px-10 py-4 bg-primary text-primary-foreground
-            rounded-2xl font-semibold text-lg hover:shadow-2xl transition"
+            className="inline-block px-12 py-5 bg-[#D1AF62] text-white
+            rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(209,175,98,0.4)]
+            hover:bg-[#C09E51] transition-all duration-300 hover:scale-105"
           >
             Explore Courses
           </Link>

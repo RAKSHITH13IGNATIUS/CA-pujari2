@@ -1,16 +1,19 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, usePathname } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
 import supabase from "@/lib/supabaseClient"
-import { Menu, X } from "lucide-react"
-import { motion } from "framer-motion"
+import { Menu, X, LogIn, LogOut, User as UserIcon } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [hidden, setHidden] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
 
   const navItems = [
     { label: "Home", href: "/" },
@@ -21,9 +24,27 @@ export function Navigation() {
     { label: "Contact", href: "/contact" },
   ]
 
+  // Track scroll for style + hide-on-scroll-down behaviour
+  useEffect(() => {
+    let lastY = window.scrollY
+
+    const handleScroll = () => {
+      const currentY = window.scrollY
+      const goingDown = currentY > lastY
+
+      setScrolled(currentY > 20)
+      setHidden(goingDown && currentY > 80)   // hide only after 80px to avoid flash on page load
+
+      lastY = currentY
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
   function AuthArea() {
-    const { user, loading, session } = useAuth()
-    const router = useRouter()
+    const { user, loading } = useAuth()
 
     const displayName =
       (user as any)?.user_metadata?.full_name || (user as any)?.user_metadata?.fullName || (user as any)?.email
@@ -37,92 +58,142 @@ export function Navigation() {
 
     if (!user)
       return (
-        <button onClick={() => router.push('/login')} className="text-sm font-medium text-primary">
-          Login
+        <button 
+          onClick={() => router.push('/login')} 
+          className="flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm"
+        >
+          <LogIn size={16} />
+          <span>Login</span>
         </button>
       )
 
     return (
       <div className="flex items-center gap-3">
-        <div className="text-sm text-foreground">
-          <div className="font-medium">{displayName}</div>
-          <div className="text-xs text-muted-foreground">{(user as any)?.email}</div>
+        <div className="hidden lg:flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-full border border-border shadow-sm">
+          <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+            <UserIcon size={14} />
+          </div>
+          <span className="text-xs font-medium max-w-[100px] truncate">{displayName}</span>
         </div>
-        <button onClick={handleSignOut} className="text-sm text-red-500">Sign out</button>
+        <button 
+          onClick={handleSignOut} 
+          className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors"
+          title="Sign Out"
+        >
+          <LogOut size={18} />
+        </button>
       </div>
     )
   }
 
   return (
-    <motion.nav
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      className="sticky top-0 z-50 bg-background border-b border-border"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-
-          {/* Logo */}
-          <button
-            onClick={() => router.push("/")}
-            className="flex items-center gap-3"
-            aria-label="Home"
-          >
-            <img src="/faviconSP.png" alt="Shobha Pujari" className="h-10 w-auto" />
-          </button>
-
-          {/* Desktop Nav */}
-          <div className="hidden md:flex gap-8">
-            {navItems.map((item) => (
-              <button
-                key={item.href}
-                onClick={() => router.push(item.href)}
-                className="text-foreground hover:text-primary text-sm font-medium"
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Right (desktop) */}
-          <div className="hidden md:flex items-center gap-4">
-            <ThemeToggle />
-            <AuthArea />
-          </div>
-
-          {/* Mobile controls: show theme toggle and menu button */}
-          <div className="flex md:hidden items-center gap-2">
-            <ThemeToggle />
+    // Fixed wrapper positions the floating nav at the top
+    <div className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4 pb-2 pointer-events-none">
+      <motion.nav
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: hidden ? "-120%" : 0, opacity: hidden ? 0 : 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 28 }}
+        className={`pointer-events-auto w-full max-w-6xl rounded-full transition-all duration-500 ${
+          scrolled
+            ? "bg-[#F7F2E8]/80 backdrop-blur-xl border border-[#A38970]/30 shadow-xl py-2"
+            : "bg-[#F7F2E8]/40 backdrop-blur-md border border-transparent shadow-none py-4"
+        }`}
+      >
+        <div className="px-5 md:px-8">
+          <div className="flex justify-between items-center">
+            
+            {/* Logo */}
             <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="p-2"
-              aria-label="Toggle menu"
+              onClick={() => router.push("/")}
+              className="flex items-center gap-3 relative group"
+              aria-label="Home"
             >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
+              <div className="absolute inset-0 bg-[#D1AF62]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+              <img src="/faviconSP.png" alt="Shobha Pujari" className="h-9 w-auto relative z-10 drop-shadow-md transition-transform group-hover:scale-105" />
             </button>
+
+            {/* Desktop Nav */}
+            <div className="hidden md:flex items-center gap-1 bg-white/40 p-1.5 rounded-full border border-[#A38970]/30 shadow-inner">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/")
+                return (
+                  <button
+                    key={item.href}
+                    onClick={() => router.push(item.href)}
+                    className={`relative px-5 py-2 text-sm font-semibold rounded-full transition-colors duration-300 ${
+                      isActive ? "text-white" : "text-[#A38970] hover:text-[#3E3730]"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="nav-pill"
+                        className="absolute inset-0 bg-[#3E3730] rounded-full shadow-md border border-[#A38970]/50"
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10">{item.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Right Group */}
+            <div className="hidden md:flex items-center gap-3">
+              <ThemeToggle />
+              <div className="w-px h-6 bg-[#A38970]/40 mx-1"></div>
+              <AuthArea />
+            </div>
+
+            {/* Mobile controls */}
+            <div className="flex md:hidden items-center gap-3">
+              <ThemeToggle />
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="p-2 rounded-full bg-white/40 hover:bg-white/60 text-[#3E3730] transition-colors"
+                aria-label="Toggle menu"
+              >
+                {isOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
           </div>
         </div>
 
-        {isOpen && (
-          <div className="md:hidden pb-4 space-y-2">
-            {navItems.map((item) => (
-              <button
-                key={item.href}
-                onClick={() => {
-                  router.push(item.href)
-                  setIsOpen(false)
-                }}
-                className="block w-full text-left px-4 py-2 hover:bg-muted rounded-lg"
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-  
-    </motion.nav>
+        {/* Mobile Dropdown */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="md:hidden overflow-hidden w-full absolute top-full left-0 mt-3 bg-[#F7F2E8]/95 backdrop-blur-xl border border-[#A38970]/30 shadow-2xl rounded-3xl"
+            >
+              <div className="px-5 py-6 flex flex-col gap-2">
+                {navItems.map((item) => {
+                  const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/")
+                  return (
+                    <button
+                      key={item.href}
+                      onClick={() => {
+                        router.push(item.href)
+                        setIsOpen(false)
+                      }}
+                      className={`flex items-center px-5 py-4 rounded-2xl text-[15px] font-semibold transition-all ${
+                       isActive ? "bg-[#D1AF62]/10 text-[#D1AF62] shadow-sm" : "text-[#3E3730] hover:bg-white/50"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  )
+                })}
+                <div className="h-px w-full bg-[#A38970]/30 my-4" />
+                <div className="flex justify-center pb-2">
+                  <AuthArea />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
+    </div>
   )
 }
