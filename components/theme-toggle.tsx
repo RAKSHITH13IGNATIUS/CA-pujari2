@@ -1,22 +1,6 @@
 "use client"
 
-import { useTheme } from "next-themes"
-import { Sun, Moon } from "lucide-react"
-import { useEffect, useState } from "react"
-
+// Theme toggle disabled — returning null so UI doesn't show theme controls.
 export function ThemeToggle() {
-  const { theme, resolvedTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => setMounted(true), [])
-  if (!mounted) return null
-
-  return (
-    <button
-      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className="p-2 rounded-lg border border-border hover:bg-muted transition"
-    >
-      {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-    </button>
-  )
+  return null
 }

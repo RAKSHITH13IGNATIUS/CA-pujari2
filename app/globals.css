@@ -1,137 +1,121 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* ========================================
+   GLOBAL DESIGN SYSTEM - FINANCE THEME
+   ======================================== */
 
 :root {
-  /* Finance-oriented palette (light mode) */
-  --background: #F2F3F4; /* Anti-Flash White */
-  --foreground: #062018; /* deep slate/green for text */
-  --card: #FFFFFF;
-  --card-foreground: #062018;
-  --popover: #F7FFFA;
-  --popover-foreground: #053127;
-  --primary: #006A4E; /* Bangladesh Green */
-  --primary-foreground: #F2F3F4;
-  --secondary: #1AB385; /* Mountain Meadow */
-  --secondary-foreground: #062018;
-  --muted: #E7F7EF; /* light mint */
-  --muted-foreground: #3A5A4A;
-  --accent: #00CC99; /* Caribbean Green */
-  --accent-foreground: #062018;
-  --destructive: #D9534F;
-  --destructive-foreground: #FFFFFF;
-  --border: #D6EDEA;
-  --input: #FFFFFF;
-  --ring: #2AAE8A;
-  --chart-1: #1AB385; /* mountain meadow */
-  --chart-2: #00CC99; /* caribbean */
-  --chart-3: #4F7942; /* frog */
-  --chart-4: #98FF98; /* mint */
-  --chart-5: #006A4E; /* bangladesh green */
-  --radius: 0.625rem;
-  --sidebar: #F8FFFB;
-  --sidebar-foreground: #0B2F23;
-  --sidebar-primary: #0F6B56;
-  --sidebar-primary-foreground: #F8FFFB;
-  --sidebar-accent: #E7FFF2;
-  --sidebar-accent-foreground: #0B2F23;
-  --sidebar-border: #DCEFE6;
-  --sidebar-ring: #98E9C9;
+  /* Backgrounds */
+  --color-bg-primary: #F2E8D8;
+  --color-bg-secondary: #E3D0A6;
+  --color-bg-accent: #D6C193;
+
+  --gradient-hero: linear-gradient(
+    135deg,
+    #F2E8D8 0%,
+    #E3D0A6 50%,
+    #D6C193 100%
+  );
+
+  /* Text */
+  --color-text-primary: #55463A;
+  --color-text-secondary: #6E6A66;
+  --color-text-light: #A39C91;
+
+  /* Accent */
+  --color-accent-gold: #c6b27d;
+  --color-accent-soft-gold: #D8C59F;
+
+  /* UI */
+  --color-border-light: #E8DFCF;
+  --color-divider: #E3D8C3;
+
+  /* Shadows */
+  --shadow-soft: 0px 10px 30px rgba(0,0,0,0.05);
+  --shadow-medium: 0px 20px 60px rgba(0,0,0,0.08);
+
+  /* Typography */
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+
+  --text-hero: 72px;
+  --text-heading: 42px;
+  --text-subheading: 24px;
+  --text-body: 16px;
+  --text-small: 14px;
+
+  /* Spacing */
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 40px;
+  --space-xl: 64px;
+  --space-xxl: 120px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 18px;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.35s ease;
+  --transition-slow: 0.6s ease;
 }
 
-.dark {
-  /* Dark mode: muted greens + olive/gold complements for calm pairing with black */
-  --background: #061412; /* near-black with green undertone */
-  --foreground: #E9FFF6; /* soft pale text */
-  --card: #071F1B;
-  --card-foreground: #E9FFF6;
-  --popover: #082620;
-  --popover-foreground: #E9FFF6;
-  --primary: #1E8A5A; /* muted green */
-  --primary-foreground: #021614;
-  --secondary: #6B8B3D; /* olive green */
-  --secondary-foreground: #F4F7F5;
-  --muted: #0C2E27;
-  --muted-foreground: #9FE6CE; /* toned mint */
-  --accent: #AAC8C4; /* subtle cool accent requested */
-  --accent-foreground: #061412;
-  --destructive: #D9534F;
-  --destructive-foreground: #FFFFFF;
-  --border: #0C3A33;
-  --input: #07221C;
-  --ring: #4FBF94;
-  --chart-1: #1E8A5A;
-  --chart-2: #00CC99;
-  --chart-3: #4F7942;
-  --chart-4: #9FB06A; /* muted olive/gold */
-  --chart-5: #7FAF92; /* subtle green */
-  --sidebar: #051916;
-  --sidebar-foreground: #E9FFF6;
-  --sidebar-primary: #1AB385;
-  --sidebar-primary-foreground: #E9FFF6;
-  --sidebar-accent: #071F1B;
-  --sidebar-accent-foreground: #E9FFF6;
-  --sidebar-border: #06322C;
-  --sidebar-ring: #63D3A8;
+/* ========================================
+   TAILWIND THEME MAPPING (IMPORTANT)
+   ======================================== */
+
+@theme {
+  --color-background: var(--color-bg-primary);
+  --color-foreground: var(--color-text-primary);
+
+  --color-card: var(--color-bg-secondary);
+  --color-muted: var(--color-bg-accent);
+
+  --color-primary: var(--color-accent-gold);
+  --color-secondary: var(--color-accent-soft-gold);
+
+  --color-border: var(--color-border-light);
+
+  --font-sans: var(--font-body);
 }
 
-@theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}
+/* ========================================
+   BASE STYLES
+   ======================================== */
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
+    @apply border-border;
   }
 
-  /* Dark-mode background: subtle radial highlight and deep green-black base */
-  .dark body {
-    background-color: var(--background);
-    background-image: radial-gradient(740px 420px at 75% 30%, rgba(38,76,64,0.24), transparent 30%),
-      linear-gradient(180deg, rgba(4,20,18,1) 0%, rgba(6,20,18,1) 40%, rgba(3,10,10,1) 100%);
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-size: cover;
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* ========================================
+   CUSTOM UTILITIES (OPTIONAL BUT USEFUL)
+   ======================================== */
+
+@layer utilities {
+  .bg-hero {
+    background: var(--gradient-hero);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
   }
 }

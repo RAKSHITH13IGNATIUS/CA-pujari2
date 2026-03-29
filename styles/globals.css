@@ -123,3 +123,106 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Finance theme variables (apply by adding `finance-theme` class to a container) */
+.finance-theme {
+  --color-bg-primary: #F2E8D8;
+  --color-bg-secondary: #E3D0A6;
+  --color-bg-accent: #D6C193;
+  --gradient-hero: linear-gradient(135deg, #F2E8D8 0%, #E3D0A6 50%, #D6C193 100%);
+
+  --color-text-primary: #55463A;
+  --color-text-secondary: #6E6A66;
+  --color-text-light: #A39C91;
+
+  --color-accent-gold: #C59B2A;
+  --color-accent-soft-gold: #D8C59F;
+
+  --color-border-light: #E8DFCF;
+  --color-divider: #E3D8C3;
+
+  --shadow-soft: 0px 10px 30px rgba(0,0,0,0.05);
+  --shadow-medium: 0px 20px 60px rgba(0,0,0,0.08);
+
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+
+  --text-hero: 72px;
+  --text-heading: 42px;
+  --text-subheading: 24px;
+  --text-body: 16px;
+  --text-small: 14px;
+
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 40px;
+  --space-xl: 64px;
+  --space-xxl: 120px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 18px;
+
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.35s ease;
+  --transition-slow: 0.6s ease;
+
+  /* Map app base variables to finance theme */
+  --background: var(--color-bg-primary);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-bg-secondary);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-bg-secondary);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-accent-gold);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-bg-accent);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-bg-accent);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-accent-soft-gold);
+  --accent-foreground: var(--color-text-primary);
+  --border: var(--color-border-light);
+  --input: var(--color-bg-secondary);
+  --ring: var(--color-divider);
+  --radius: var(--radius-lg);
+  --sidebar: var(--color-bg-secondary);
+  --sidebar-foreground: var(--color-text-primary);
+}
+
+/* Ensure Tailwind/shadcn color tokens are explicitly set inside the finance theme
+   so utilities like `bg-background` and `text-foreground` resolve correctly. */
+.finance-theme {
+  --color-background: var(--color-bg-primary);
+  --color-foreground: var(--color-text-primary);
+  --color-card: var(--color-bg-secondary);
+  --color-card-foreground: var(--color-text-primary);
+  --color-popover: var(--color-bg-secondary);
+  --color-popover-foreground: var(--color-text-primary);
+  --color-primary: var(--color-accent-gold);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-bg-accent);
+  --color-secondary-foreground: var(--color-text-primary);
+  --color-muted: var(--color-bg-accent);
+  --color-muted-foreground: var(--color-text-secondary);
+  --color-accent: var(--color-accent-soft-gold);
+  --color-accent-foreground: var(--color-text-primary);
+  --color-border: var(--color-border-light);
+  --color-input: var(--color-bg-secondary);
+  --color-ring: var(--color-divider);
+  --radius: var(--radius-lg);
+  --color-sidebar: var(--color-bg-secondary);
+  --color-sidebar-foreground: var(--color-text-primary);
+  --color-sidebar-primary: var(--color-accent-gold);
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: var(--color-bg-accent);
+  --color-sidebar-accent-foreground: var(--color-text-primary);
+  --color-sidebar-border: var(--color-border-light);
+  --color-sidebar-ring: var(--color-divider);
+
+/* Hero text override (light cream) */
+.finance-theme .hero-foreground {
+  color: var(--color-text-light) !important;
+}
+}
