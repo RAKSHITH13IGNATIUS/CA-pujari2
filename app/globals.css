@@ -65,6 +65,41 @@
 }
 
 /* ========================================
+   DARK MODE VARIABLES
+   ======================================== */
+
+.dark {
+  /* Backgrounds */
+  --color-bg-primary: #0F172A;
+  --color-bg-secondary: #1A2847;
+  --color-bg-accent: #243456;
+
+  --gradient-hero: linear-gradient(
+    135deg,
+    #0F172A 0%,
+    #1A2847 50%,
+    #243456 100%
+  );
+
+  /* Text */
+  --color-text-primary: #E0E7FF;
+  --color-text-secondary: #C7D2FE;
+  --color-text-light: #A5B4FC;
+
+  /* Accent */
+  --color-accent-gold: #4FD1FF;
+  --color-accent-soft-gold: #3B82F6;
+
+  /* UI */
+  --color-border-light: #334155;
+  --color-divider: #475569;
+
+  /* Shadows */
+  --shadow-soft: 0px 10px 30px rgba(0,0,0,0.3);
+  --shadow-medium: 0px 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ========================================
    TAILWIND THEME MAPPING (IMPORTANT)
    ======================================== */
 

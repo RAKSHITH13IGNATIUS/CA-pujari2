@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
+import { useTheme } from "@/hooks/useTheme"
 import supabase from "@/lib/supabaseClient"
 import { Menu, X, LogIn, LogOut, User as UserIcon } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -12,8 +13,10 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [hidden, setHidden] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
+  const { isLight } = useTheme()
 
   const navItems = [
     { label: "Home", href: "/" },
@@ -25,6 +28,10 @@ export function Navigation() {
   ]
 
   // Track scroll for style + hide-on-scroll-down behaviour
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   useEffect(() => {
     let lastY = window.scrollY
 
@@ -42,6 +49,20 @@ export function Navigation() {
     handleScroll()
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  // Theme-aware colors
+  const navBgScroll = isLight ? "bg-[#F7F2E8]/80" : "bg-[#0F172A]/80"
+  const navBgDefault = isLight ? "bg-[#F7F2E8]/40" : "bg-[#0F172A]/40"
+  const navBorder = isLight ? "border-[#A38970]/30" : "border-[#4FD1FF]/30"
+  const itemBg = isLight ? "bg-white/40" : "bg-slate-800/40"
+  const itemBgHover = isLight ? "border-[#A38970]/30" : "border-[#4FD1FF]/30"
+  const itemActive = isLight ? "bg-[#3E3730]" : "bg-[#4FD1FF]"
+  const itemText = isLight ? "text-[#A38970]" : "text-[#A5B4FC]"
+  const itemTextActive = isLight ? "text-white" : "text-white"
+  const itemTextHover = isLight ? "hover:text-[#3E3730]" : "hover:text-[#4FD1FF]"
+  const dividerColor = isLight ? "bg-[#A38970]/40" : "bg-[#4FD1FF]/40"
+  const hoverGlow = isLight ? "bg-[#D1AF62]/20" : "bg-[#4FD1FF]/20"
+  const logoShadow = isLight ? "drop-shadow-md" : "drop-shadow-lg"
 
   function AuthArea() {
     const { user, loading } = useAuth()
@@ -96,8 +117,8 @@ export function Navigation() {
         animate={{ y: hidden ? "-120%" : 0, opacity: hidden ? 0 : 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 28 }}
         className={`pointer-events-auto w-full max-w-6xl rounded-full transition-all duration-500 ${scrolled
-          ? "bg-[#F7F2E8]/80 backdrop-blur-xl border border-[#A38970]/30 shadow-xl py-2"
-          : "bg-[#F7F2E8]/40 backdrop-blur-md border border-transparent shadow-none py-4"
+          ? `${navBgScroll} backdrop-blur-xl ${navBorder} shadow-xl py-2`
+          : `${navBgDefault} backdrop-blur-md border border-transparent shadow-none py-4`
           }`}
       >
         <div className="px-5 md:px-8">
@@ -109,25 +130,25 @@ export function Navigation() {
               className="flex items-center gap-3 relative group"
               aria-label="Home"
             >
-              <div className="absolute inset-0 bg-[#D1AF62]/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-              <img src="/faviconSP.png" alt="Shobha Pujari" className="h-9 w-auto relative z-10 drop-shadow-md transition-transform group-hover:scale-105" />
+              <div className={`absolute inset-0 ${hoverGlow} blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity`} />
+              <img src="/faviconSP.png" alt="Shobha Pujari" className={`h-9 w-auto relative z-10 ${logoShadow} transition-transform group-hover:scale-105`} />
             </button>
 
             {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-1 bg-white/40 p-1.5 rounded-full border border-[#A38970]/30 shadow-inner">
+            <div className={`hidden md:flex items-center gap-1 ${itemBg} p-1.5 rounded-full ${itemBgHover} shadow-inner`}>
               {navItems.map((item) => {
                 const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/")
                 return (
                   <button
                     key={item.href}
                     onClick={() => router.push(item.href)}
-                    className={`relative px-5 py-2 text-sm font-semibold rounded-full transition-colors duration-300 ${isActive ? "text-white" : "text-[#A38970] hover:text-[#3E3730]"
+                    className={`relative px-5 py-2 text-sm font-semibold rounded-full transition-colors duration-300 ${isActive ? itemTextActive : `${itemText} ${itemTextHover}`
                       }`}
                   >
                     {isActive && (
                       <motion.div
                         layoutId="nav-pill"
-                        className="absolute inset-0 bg-[#3E3730] rounded-full shadow-md border border-[#A38970]/50"
+                        className={`absolute inset-0 ${itemActive} rounded-full shadow-md ${itemBgHover}`}
                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                       />
                     )}
@@ -140,7 +161,7 @@ export function Navigation() {
             {/* Right Group */}
             <div className="hidden md:flex items-center gap-3">
               <ThemeToggle />
-              <div className="w-px h-6 bg-[#A38970]/40 mx-1"></div>
+              <div className={`w-px h-6 ${dividerColor} mx-1`}></div>
               <AuthArea />
             </div>
 
