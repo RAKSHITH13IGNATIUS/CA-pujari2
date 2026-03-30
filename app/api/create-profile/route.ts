@@ -10,9 +10,9 @@ export async function POST(request: Request) {
     const supabaseAdmin = createServerSupabase()
 
     // Lookup the auth user by email using the admin API
-    const userResult = await supabaseAdmin.auth.admin.getUserByEmail(email)
-    // userResult.data?.user may contain the user object depending on SDK
-    const user = (userResult as any).data?.user ?? (userResult as any).data
+    const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers()
+    if (listError) return NextResponse.json({ error: listError.message }, { status: 500 })
+    const user = users.find(u => u.email === email)
 
     if (!user || !user.id) {
       return NextResponse.json({ error: 'Auth user not found yet' }, { status: 404 })

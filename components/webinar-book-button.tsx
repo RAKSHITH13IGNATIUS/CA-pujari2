@@ -4,7 +4,7 @@ import Link from "next/link"
 import { CreditCard } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 
-export default function WebinarBookButton({ id }: { id: number | string }) {
+export default function WebinarBookButton({ id, size }: { id: number | string, size?: "sm" | "md" | "lg" | string }) {
   const { user } = useAuth()
 
   const hrefIfLoggedIn = `/webinars/book/${id}`
